@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: keycloak
+  labels:
+    app: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      initContainers:
+        - name: wait-for-db
+          image: busybox
+          command: [ 'sh', '-c', 'until nc -z postgres-svc 5432; do echo waiting for db; sleep 2; done;' ]
+      containers:
+        - name: keycloak
+          image: {{ .Values.keycloak.image }}
+          args: ["start-dev", "--import-realm"]
+          env:
+            - name: KEYCLOAK_ADMIN
+              value: {{ .Values.keycloak.env.admin }}
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: {{ .Values.keycloak.env.password }}
+            - name: KC_PROXY
+              value: {{ .Values.keycloak.env.proxy }}
+            - name: KC_DB_URL_HOST
+              value: {{ .Values.keycloak.env.dbUrl }}
+            - name: KC_DB_SCHEMA
+              value: {{ .Values.keycloak.env.schema }}
+            - name: KC_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: KC_DB
+              value: {{ .Values.keycloak.env.db }}
+            - name: KC_HOSTNAME
+              value: keycloak
+          ports:
+            - name: http
+              containerPort: {{ .Values.keycloak.containerPort }}
+          readinessProbe:
+            httpGet:
+              path: /realms/master
+              port: {{ .Values.keycloak.port }}
+          resources:
+            requests:
+              cpu: {{ .Values.keycloak.resources.requests.cpu }}
+              memory: {{ .Values.keycloak.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.keycloak.resources.limits.cpu }}
+              memory: {{ .Values.keycloak.resources.limits.memory }}
+          volumeMounts:
+            - name: realm-config
+              mountPath: /opt/keycloak/data/import
+            - name: tls-vol
+              mountPath: "/etc/tls"
+              readOnly: true
+      volumes:
+        - name: realm-config
+          configMap:
+            name: keycloak-realm-config
+            items:
+              - key: realm.json
+                path: realm.json
+        - name: tls-vol
+          secret:
+            secretName: keycloak-certs-secret

@@ -1,0 +1,16 @@
+# postgres-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-svc
+  namespace: keycloak
+  labels:
+    app: postgres
+spec:
+  selector:
+    app: postgres
+  type: LoadBalancer
+  ports:
+    - name: http
+      port: {{ .Values.postgres.containerPort}}
+      targetPort: {{ .Values.postgres.containerPort}}

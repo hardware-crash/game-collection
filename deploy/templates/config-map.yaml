@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spring-config
+  namespace: keycloak
+data:
+  REDIRECT_URL: {{ .Values.data.config.redirect.url }}
+  ISSUER_URI: {{ .Values.data.config.issuer.uri }}
+  DATABASE_URL: {{ .Values.data.config.database.url }}

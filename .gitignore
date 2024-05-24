@@ -1,0 +1,53 @@
+# Logs
+logs/
+*.log
+
+# Dependency directories
+node_modules/
+vendor/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Compiled source files
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Backup files
+*.bak
+*.swp
+*.tmp
+
+# IDE specific files
+.vscode/
+.idea/
+
+# Environment variables
+.env
+
+# Python specific
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Java specific
+*.jar
+*.war
+*.ear
+
+# Node.js specific
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Go specific
+*.exe
+*.test
+*.out
+
+git.txt
